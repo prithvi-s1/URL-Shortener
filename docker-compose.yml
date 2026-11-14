@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:7-alpine
+    image: docker.io/library/redis:7-alpine
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis-data:/data
@@ -24,7 +24,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: nginx:1.27-alpine
+    image: docker.io/library/nginx:1.27-alpine
     ports:
       - "8080:80"
     volumes:

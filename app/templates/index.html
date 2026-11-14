@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #1e293b;
+            padding: 32px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #38bdf8;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #7dd3fc;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .result {
+            background: #0f172a;
+            padding: 18px;
+            margin-top: 24px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .short-link {
+            color: #38bdf8;
+            overflow-wrap: anywhere;
+            font-size: 18px;
+        }
+
+        .secondary {
+            background: #334155;
+            color: #f1f5f9;
+        }
+
+        .secondary:hover {
+            background: #475569;
+        }
+
+        .stats {
+            border-top: 1px solid #334155;
+            margin-top: 18px;
+            padding-top: 16px;
+        }
+
+        #error {
+            color: #f87171;
+            margin-top: 12px;
+        }
+
+        .footer {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 28px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>URL Shortener</h1>
+
+    <p class="subtitle">
+        Turn long URLs into short, shareable links
+        and track their clicks.
+    </p>
+
+    <form id="shorten-form">
+        <label for="url">Enter your URL</label>
+
+        <input
+            type="url"
+            id="url"
+            placeholder="https://example.com/long-url"
+            required
+        >
+
+        <button type="submit" id="shorten-btn">
+            Shorten URL
+        </button>
+    </form>
+
+    <p id="error" role="alert"></p>
+
+    <div class="result" id="result">
+
+        <label>Your shortened URL</label>
+
+        <a id="short-link"
+           class="short-link"
+           target="_blank"
+           rel="noopener noreferrer">
+        </a>
+
+        <button class="secondary" id="copy-btn">
+            Copy Link
+        </button>
+
+        <div class="stats">
+
+            <p>
+                Total clicks:
+                <strong id="hits">0</strong>
+            </p>
+
+            <button class="secondary" id="stats-btn">
+                Refresh Statistics
+            </button>
+
+        </div>
+    </div>
+
+    <div class="footer">
+        Flask · Redis · Nginx · Podman
+    </div>
+
+</div>
+
+<script>
+
+    let currentCode = "";
+    let currentShortURL = "";
+
+    const form = document.getElementById("shorten-form");
+    const error = document.getElementById("error");
+    const result = document.getElementById("result");
+    const shortenBtn = document.getElementById("shorten-btn");
+
+    form.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const url = document.getElementById("url").value.trim();
+
+        error.textContent = "";
+        result.style.display = "none";
+        shortenBtn.disabled = true;
+        shortenBtn.textContent = "Shortening...";
+
+        try {
+
+            const response = await fetch("/api/shorten", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ url: url })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Unable to shorten URL");
+            }
+
+            currentCode = data.code;
+            currentShortURL = data.short_url;
+
+            const link = document.getElementById("short-link");
+
+            link.href = data.short_url;
+            link.textContent = data.short_url;
+
+            document.getElementById("hits").textContent = "0";
+            document.getElementById("copy-btn").textContent = "Copy Link";
+
+            result.style.display = "block";
+
+        } catch (err) {
+
+            error.textContent = err.message;
+
+        } finally {
+
+            shortenBtn.disabled = false;
+            shortenBtn.textContent = "Shorten URL";
+
+        }
+
+    });
+
+
+    document.getElementById("copy-btn")
+        .addEventListener("click", async function() {
+
+            try {
+                await navigator.clipboard.writeText(currentShortURL);
+                this.textContent = "Copied!";
+            } catch (err) {
+                error.textContent =
+                    "Could not copy automatically. Copy the link manually.";
+            }
+
+        });
+
+
+    document.getElementById("stats-btn")
+        .addEventListener("click", async function() {
+
+            if (!currentCode) return;
+
+            error.textContent = "";
+
+            try {
+
+                const response = await fetch(
+                    "/api/stats/" + encodeURIComponent(currentCode)
+                );
+
+                if (!response.ok) {
+                    throw new Error("Unable to retrieve statistics");
+                }
+
+                const data = await response.json();
+
+                document.getElementById("hits").textContent = data.hits;
+
+            } catch (err) {
+
+                error.textContent = err.message;
+
+            }
+
+        });
+
+</script>
+
+</body>
+</html>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +7,10 @@
     <title>URL Shortener</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: "Times New Roman", Times, serif;
             background-color: #e8e4dc;
@@ -15,8 +20,8 @@
         }
 
         .container {
-            max-width: 700px;
-            margin: 40px auto;
+            max-width: 650px;
+            margin: 60px auto;
             background-color: #f7f4ee;
             border: 1px solid #b8b0a5;
             padding: 30px;
@@ -25,15 +30,15 @@
         h1 {
             text-align: center;
             font-size: 32px;
-            margin-bottom: 10px;
             font-weight: normal;
+            margin-bottom: 10px;
         }
 
         .subtitle {
             text-align: center;
             font-size: 17px;
-            margin-bottom: 30px;
             color: #5a534c;
+            margin-bottom: 30px;
         }
 
         label {
@@ -45,24 +50,22 @@
         input {
             width: 100%;
             padding: 10px;
+            font-family: inherit;
             font-size: 16px;
-            font-family: "Times New Roman", Times, serif;
             border: 1px solid #9f978c;
             background-color: #fcfbf8;
             color: #2f2a26;
-            margin-bottom: 15px;
         }
 
         button {
             padding: 10px 18px;
+            font-family: inherit;
             font-size: 16px;
-            font-family: "Times New Roman", Times, serif;
             border: 1px solid #7d8b99;
             background-color: #c8d2dc;
             color: #2f2a26;
             cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         button:hover {
@@ -70,55 +73,52 @@
         }
 
         button:disabled {
+            opacity: 0.6;
             cursor: wait;
-            opacity: 0.7;
         }
 
         .result {
+            display: none;
             margin-top: 25px;
             padding-top: 20px;
             border-top: 1px solid #b8b0a5;
-            display: none;
         }
 
         .short-link {
-            display: inline-block;
-            margin-top: 10px;
-            margin-bottom: 15px;
+            display: block;
             color: #4e657a;
-            word-break: break-all;
             font-size: 18px;
-        }
-
-        .stats {
-            margin-top: 20px;
+            overflow-wrap: anywhere;
+            margin-top: 10px;
         }
 
         #error {
             color: #8b3f3f;
-            margin-top: 10px;
             font-size: 16px;
         }
 
         .footer {
             text-align: center;
             margin-top: 30px;
-            font-size: 15px;
+            font-size: 14px;
             color: #6a635b;
         }
     </style>
 </head>
+
 <body>
 
 <div class="container">
+
     <h1>URL Shortener</h1>
 
     <p class="subtitle">
-        Enter a long URL to generate a shorter link and view its usage statistics.
+        Enter a long URL to generate a shorter link.
     </p>
 
     <form id="shorten-form">
         <label for="url">Enter URL</label>
+
         <input
             type="url"
             id="url"
@@ -126,32 +126,36 @@
             required
         >
 
-        <button type="submit" id="shorten-btn">Shorten URL</button>
+        <button type="submit" id="shorten-btn">
+            Shorten URL
+        </button>
     </form>
 
-    <p id="error"></p>
+    <p id="error" role="alert"></p>
 
     <div class="result" id="result">
+
         <label>Shortened URL</label>
-        <br>
-        <a id="short-link" class="short-link" target="_blank" rel="noopener noreferrer"></a>
-        <br>
 
-        <button id="copy-btn" type="button">Copy Link</button>
+        <a id="short-link"
+           class="short-link"
+           target="_blank"
+           rel="noopener noreferrer">
+        </a>
 
-        <div class="stats">
-            <p>Total clicks: <strong id="hits">0</strong></p>
-            <button id="stats-btn" type="button">Refresh Statistics</button>
-        </div>
+        <button id="copy-btn" type="button">
+            Copy Link
+        </button>
+
     </div>
 
     <div class="footer">
         Flask | Redis | Nginx | Podman
     </div>
+
 </div>
 
 <script>
-    let currentCode = "";
     let currentShortURL = "";
 
     const form = document.getElementById("shorten-form");
@@ -184,17 +188,16 @@
                 throw new Error(data.error || "Unable to shorten URL");
             }
 
-            currentCode = data.code;
             currentShortURL = data.short_url;
 
             const link = document.getElementById("short-link");
-            link.href = data.short_url;
-            link.textContent = data.short_url;
+            link.href = currentShortURL;
+            link.textContent = currentShortURL;
 
-            document.getElementById("hits").textContent = "0";
             document.getElementById("copy-btn").textContent = "Copy Link";
 
             result.style.display = "block";
+
         } catch (err) {
             error.textContent = err.message;
         } finally {
@@ -203,33 +206,18 @@
         }
     });
 
-    document.getElementById("copy-btn").addEventListener("click", async function() {
-        try {
-            await navigator.clipboard.writeText(currentShortURL);
-            this.textContent = "Copied";
-        } catch (err) {
-            error.textContent = "Could not copy automatically. Please copy the link manually.";
-        }
-    });
+    document.getElementById("copy-btn")
+        .addEventListener("click", async function() {
 
-    document.getElementById("stats-btn").addEventListener("click", async function() {
-        if (!currentCode) return;
-
-        error.textContent = "";
-
-        try {
-            const response = await fetch("/api/stats/" + encodeURIComponent(currentCode));
-
-            if (!response.ok) {
-                throw new Error("Unable to retrieve statistics");
+            try {
+                await navigator.clipboard.writeText(currentShortURL);
+                this.textContent = "Copied";
+            } catch (err) {
+                error.textContent =
+                    "Please copy the link manually.";
             }
 
-            const data = await response.json();
-            document.getElementById("hits").textContent = data.hits;
-        } catch (err) {
-            error.textContent = err.message;
-        }
-    });
+        });
 </script>
 
 </body>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,142 +6,119 @@
     <title>URL Shortener</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: #f1f5f9;
-            min-height: 100vh;
+            font-family: "Times New Roman", Times, serif;
+            background-color: #e8e4dc;
+            color: #2f2a26;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 40px;
         }
 
         .container {
-            background: #1e293b;
-            padding: 32px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 520px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 700px;
+            margin: 40px auto;
+            background-color: #f7f4ee;
+            border: 1px solid #b8b0a5;
+            padding: 30px;
         }
 
         h1 {
-            margin-top: 0;
-            font-size: 28px;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: normal;
         }
 
         .subtitle {
-            color: #94a3b8;
-            margin-bottom: 28px;
-            line-height: 1.5;
+            text-align: center;
+            font-size: 17px;
+            margin-bottom: 30px;
+            color: #5a534c;
         }
 
         label {
             display: block;
-            font-size: 14px;
             margin-bottom: 8px;
+            font-size: 18px;
         }
 
         input {
             width: 100%;
-            padding: 14px;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            background: #0f172a;
-            color: white;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input:focus {
-            border-color: #38bdf8;
+            padding: 10px;
+            font-size: 16px;
+            font-family: "Times New Roman", Times, serif;
+            border: 1px solid #9f978c;
+            background-color: #fcfbf8;
+            color: #2f2a26;
+            margin-bottom: 15px;
         }
 
         button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 12px;
-            background: #38bdf8;
-            color: #0f172a;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: bold;
+            padding: 10px 18px;
+            font-size: 16px;
+            font-family: "Times New Roman", Times, serif;
+            border: 1px solid #7d8b99;
+            background-color: #c8d2dc;
+            color: #2f2a26;
             cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
         }
 
         button:hover {
-            background: #7dd3fc;
+            background-color: #b8c4cf;
         }
 
         button:disabled {
-            opacity: 0.6;
             cursor: wait;
+            opacity: 0.7;
         }
 
         .result {
-            background: #0f172a;
-            padding: 18px;
-            margin-top: 24px;
-            border-radius: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #b8b0a5;
             display: none;
         }
 
         .short-link {
-            color: #38bdf8;
-            overflow-wrap: anywhere;
+            display: inline-block;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            color: #4e657a;
+            word-break: break-all;
             font-size: 18px;
         }
 
-        .secondary {
-            background: #334155;
-            color: #f1f5f9;
-        }
-
-        .secondary:hover {
-            background: #475569;
-        }
-
         .stats {
-            border-top: 1px solid #334155;
-            margin-top: 18px;
-            padding-top: 16px;
+            margin-top: 20px;
         }
 
         #error {
-            color: #f87171;
-            margin-top: 12px;
+            color: #8b3f3f;
+            margin-top: 10px;
+            font-size: 16px;
         }
 
         .footer {
             text-align: center;
-            color: #94a3b8;
-            font-size: 12px;
-            margin-top: 28px;
+            margin-top: 30px;
+            font-size: 15px;
+            color: #6a635b;
         }
     </style>
 </head>
-
 <body>
 
 <div class="container">
-
     <h1>URL Shortener</h1>
 
     <p class="subtitle">
-        Turn long URLs into short, shareable links
-        and track their clicks.
+        Enter a long URL to generate a shorter link and view its usage statistics.
     </p>
 
     <form id="shorten-form">
-        <label for="url">Enter your URL</label>
-
+        <label for="url">Enter URL</label>
         <input
             type="url"
             id="url"
@@ -150,49 +126,31 @@
             required
         >
 
-        <button type="submit" id="shorten-btn">
-            Shorten URL
-        </button>
+        <button type="submit" id="shorten-btn">Shorten URL</button>
     </form>
 
-    <p id="error" role="alert"></p>
+    <p id="error"></p>
 
     <div class="result" id="result">
+        <label>Shortened URL</label>
+        <br>
+        <a id="short-link" class="short-link" target="_blank" rel="noopener noreferrer"></a>
+        <br>
 
-        <label>Your shortened URL</label>
-
-        <a id="short-link"
-           class="short-link"
-           target="_blank"
-           rel="noopener noreferrer">
-        </a>
-
-        <button class="secondary" id="copy-btn">
-            Copy Link
-        </button>
+        <button id="copy-btn" type="button">Copy Link</button>
 
         <div class="stats">
-
-            <p>
-                Total clicks:
-                <strong id="hits">0</strong>
-            </p>
-
-            <button class="secondary" id="stats-btn">
-                Refresh Statistics
-            </button>
-
+            <p>Total clicks: <strong id="hits">0</strong></p>
+            <button id="stats-btn" type="button">Refresh Statistics</button>
         </div>
     </div>
 
     <div class="footer">
-        Flask · Redis · Nginx · Podman
+        Flask | Redis | Nginx | Podman
     </div>
-
 </div>
 
 <script>
-
     let currentCode = "";
     let currentShortURL = "";
 
@@ -202,7 +160,6 @@
     const shortenBtn = document.getElementById("shorten-btn");
 
     form.addEventListener("submit", async function(event) {
-
         event.preventDefault();
 
         const url = document.getElementById("url").value.trim();
@@ -210,10 +167,9 @@
         error.textContent = "";
         result.style.display = "none";
         shortenBtn.disabled = true;
-        shortenBtn.textContent = "Shortening...";
+        shortenBtn.textContent = "Processing...";
 
         try {
-
             const response = await fetch("/api/shorten", {
                 method: "POST",
                 headers: {
@@ -232,7 +188,6 @@
             currentShortURL = data.short_url;
 
             const link = document.getElementById("short-link");
-
             link.href = data.short_url;
             link.textContent = data.short_url;
 
@@ -240,64 +195,41 @@
             document.getElementById("copy-btn").textContent = "Copy Link";
 
             result.style.display = "block";
-
         } catch (err) {
-
             error.textContent = err.message;
-
         } finally {
-
             shortenBtn.disabled = false;
             shortenBtn.textContent = "Shorten URL";
-
         }
-
     });
 
+    document.getElementById("copy-btn").addEventListener("click", async function() {
+        try {
+            await navigator.clipboard.writeText(currentShortURL);
+            this.textContent = "Copied";
+        } catch (err) {
+            error.textContent = "Could not copy automatically. Please copy the link manually.";
+        }
+    });
 
-    document.getElementById("copy-btn")
-        .addEventListener("click", async function() {
+    document.getElementById("stats-btn").addEventListener("click", async function() {
+        if (!currentCode) return;
 
-            try {
-                await navigator.clipboard.writeText(currentShortURL);
-                this.textContent = "Copied!";
-            } catch (err) {
-                error.textContent =
-                    "Could not copy automatically. Copy the link manually.";
+        error.textContent = "";
+
+        try {
+            const response = await fetch("/api/stats/" + encodeURIComponent(currentCode));
+
+            if (!response.ok) {
+                throw new Error("Unable to retrieve statistics");
             }
 
-        });
-
-
-    document.getElementById("stats-btn")
-        .addEventListener("click", async function() {
-
-            if (!currentCode) return;
-
-            error.textContent = "";
-
-            try {
-
-                const response = await fetch(
-                    "/api/stats/" + encodeURIComponent(currentCode)
-                );
-
-                if (!response.ok) {
-                    throw new Error("Unable to retrieve statistics");
-                }
-
-                const data = await response.json();
-
-                document.getElementById("hits").textContent = data.hits;
-
-            } catch (err) {
-
-                error.textContent = err.message;
-
-            }
-
-        });
-
+            const data = await response.json();
+            document.getElementById("hits").textContent = data.hits;
+        } catch (err) {
+            error.textContent = err.message;
+        }
+    });
 </script>
 
 </body>
